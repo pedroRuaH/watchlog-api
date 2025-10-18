@@ -167,3 +167,5 @@ classDiagram
     WatchEntry "*" --> "0..1" Series : contenido
     Series "1" --> "*" Season : seasons
 ```
+# Recursos
+https://es.wikipedia.org/wiki/WSGI
