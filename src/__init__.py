@@ -1,7 +1,7 @@
 """Configuracion general de la aplicacion Flask."""
 
 from flask import Flask
-
+from flask_cors import CORS
 from .config import DevelopmentConfig
 from .extensions import db, migrate
 
@@ -13,6 +13,7 @@ def create_app(config_object: type[DevelopmentConfig] = DevelopmentConfig) -> Fl
 
     register_extensions(app)
     register_blueprints(app)
+    CORS(app)
 
     return app
 
