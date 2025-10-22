@@ -18,6 +18,12 @@ class Movie(db.Model):
     # title = db.Column(db.String(120), nullable=False)
     # ...
 
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(120), nullable=False)
+    genre = db.Column(db.String(80), nullable=True)
+    release_year = db.Column(db.Integer nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime)
+
     # TODO: crear relacion con WatchEntry (one-to-many) si aplica.
 
     def __repr__(self) -> str:
