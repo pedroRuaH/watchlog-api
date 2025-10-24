@@ -15,6 +15,16 @@ class Season(db.Model):
 
     # TODO: configurar relacion back_populates con Series.
     # series = db.relationship("Series", back_populates="seasons")
+    id = db.Column(db.Integer, primary_key=True)
+    series_id = db.Column(db.Integer, db.ForeignKey("series.id"), nullable=False)
+    number = db.Column(db.Integer, nullable=False)
+    episodes_count = db.Column(db.Integer, nullable=False, default=0)
+    
+    # Relacion con Series
+    series = db.relationship(
+        "Serie",
+        back_populates="seasons",
+    )
 
     def to_dict(self) -> dict:
         """Serializa la temporada en un diccionario."""
