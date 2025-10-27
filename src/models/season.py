@@ -1,31 +1,28 @@
 """Modelo que representa una temporada de una serie."""
 
 from __future__ import annotations
-
 from src.extensions import db
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from src.models.serie import Serie
+from sqlalchemy import Integer, String, ForeignKey
+
 
 
 class Season(db.Model):
     """Temporada asociada a una serie."""
 
     __tablename__ = "seasons"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    series_id: Mapped[int] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"), nullable=False)
+    number: Mapped[int] = mapped_column(Integer, nullable=False)
+    episodes_count: Mapped[int] = mapped_column(Integer,nullable=False, default=0)
 
-    # TODO: definir columnas (id, series_id, number, episodes_count).
-    # TODO: establecer restriccion unica por (series_id, number).
-
-    # TODO: configurar relacion back_populates con Series.
-    # series = db.relationship("Series", back_populates="seasons")
-    id = db.Column(db.Integer, primary_key=True)
-    series_id = db.Column(db.Integer, db.ForeignKey("series.id"), nullable=False)
-    number = db.Column(db.Integer, nullable=False)
-    episodes_count = db.Column(db.Integer, nullable=False, default=0)
-    
     # Relacion con Series
-    series = db.relationship(
-        "Serie",
+    series: Mapped[Serie] = relationship(
         back_populates="seasons",
+        lazy="joined", 
+        
     )
-
     def to_dict(self) -> dict:
         """Serializa la temporada en un diccionario."""
         # TODO: reemplazar esta implementacion por la serializacion real.

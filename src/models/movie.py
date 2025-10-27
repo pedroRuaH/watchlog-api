@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import JSON
+from sqlalchemy import JSON, DateTime, String, Integer
 
 from src.extensions import db
+
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+
+from src.models.watch_entry import WatchEntry
 
 
 class Movie(db.Model):
@@ -14,15 +18,16 @@ class Movie(db.Model):
 
     __tablename__ = "movies"
 
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(120), nullable=False)
-    genre = db.Column(JSON, nullable=False, default=list)
-    release_year = db.Column(db.Integer, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
-
-    # TODO: crear relacion con WatchEntry (one-to-many) si aplica.
-    watch_entries = db.relationship(
-        "WatchEntry",
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(120), nullable=False)
+    genre: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    release_year: Mapped[int] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    # Movie -> WatchEntry (one to many collection)
+    watch_entries: Mapped[list[WatchEntry]] = relationship(
         back_populates="movie",
         cascade="all, delete-orphan",
         lazy="dynamic",
