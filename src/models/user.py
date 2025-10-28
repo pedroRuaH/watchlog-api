@@ -1,11 +1,11 @@
 """Modelo para usuarios que usan la plataforma."""
 
 from __future__ import annotations
-
 from datetime import datetime, timezone
-
 from src.extensions import db
-
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import String, Integer, DateTime
+from src.models.watch_entry import WatchEntry
 
 
 class User(db.Model):
@@ -13,17 +13,17 @@ class User(db.Model):
 
     __tablename__ = "users"
 
-    # TODO: definir columnas (id, name, email opcional, created_at).
-    # TODO: agregar relacion con WatchEntry (one-to-many).
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(80), nullable=False)
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
 
     # Relacion con WatchEntry
-    watch_entries = db.relationship(
-        "WatchEntry",
+    watch_entries: Mapped[list[WatchEntry]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="dynamic",

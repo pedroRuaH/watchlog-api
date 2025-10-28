@@ -38,6 +38,7 @@ class Serie(db.Model):
         back_populates="series",
         lazy="selectin",
         cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     # Serie -> WatchEntry (one to many collection)

@@ -1,10 +1,13 @@
 """Modelo puente que guarda el progreso del usuario."""
 
 from __future__ import annotations
-
 from datetime import datetime, timezone
-
 from src.extensions import db
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import String, Integer, DateTime, ForeignKey
+from src.models.movie import Movie
+from src.models.serie import Serie
+from src.models.user import User
 
 
 
@@ -13,38 +16,35 @@ class WatchEntry(db.Model):
 
     __tablename__ = "watch_entries"
 
-    # TODO: definir columnas basicas (id, user_id, content_type, content_id, status).
-    # TODO: agregar columnas de progreso (current_season, current_episode, watched_episodes, total_episodes).
-    # TODO: establecer claves foraneas hacia User, Movie y Series segun el tipo.
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    content_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id"), nullable=True)
+    series_id: Mapped[int] = mapped_column(ForeignKey("series.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="watching")
+    current_season: Mapped[int] = mapped_column(Integer, nullable=True)
+    current_episode: Mapped[int] = mapped_column(Integer, nullable=True)
+    watched_episodes: Mapped[int] = mapped_column(Integer, nullable=True, default=0)
+    total_episodes: Mapped[int] = mapped_column(Integer, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
 
-    # TODO: modelar las relaciones back_populates con User, Movie y Series.
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    content_type = db.Column(db.String(50), nullable=False)
-    content_id = db.Column(db.Integer, nullable=False)
-    movie_id = db.Column(db.Integer, db.ForeignKey("movies.id"), nullable=True)
-    series_id = db.Column(db.Integer, db.ForeignKey("series.id"), nullable=True)
-    status = db.Column(db.String(50), nullable=False, default="watching")
-    current_season = db.Column(db.Integer, nullable=True)
-    current_episode = db.Column(db.Integer, nullable=True)
-    watched_episodes = db.Column(db.Integer, nullable=True, default=0)
-    total_episodes = db.Column(db.Integer, nullable=True)
-    
-    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
     # Relacion con User
-    user = db.relationship(
+    user: Mapped[list[User]] = relationship(
         "User",
         back_populates="watch_entries",
     )
     # Relacion con Movie
-    movie = db.relationship(
+    movie: Mapped[list[Movie]] = relationship(
         "Movie",
         back_populates="watch_entries",
     )
     # Relacion con Series
-    series = db.relationship(
+    series: Mapped[list[Serie]] = relationship(
         "Serie",
         back_populates="watch_entries",
     )
