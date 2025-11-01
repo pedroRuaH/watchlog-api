@@ -1,17 +1,15 @@
 """Modelo principal para las peliculas."""
 
 from __future__ import annotations
-
+from typing import TYPE_CHECKING
 from datetime import datetime, timezone
-
 from sqlalchemy import JSON, DateTime, String, Integer
-
 from src.extensions import db
-
 from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.sql import func
 
-from src.models.watch_entry import WatchEntry
-
+if TYPE_CHECKING:
+    from src.models.watch_entry import WatchEntry
 
 class Movie(db.Model):
     """Representa una pelicula dentro del catalogo."""
@@ -25,22 +23,20 @@ class Movie(db.Model):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
+        server_default=func.now(),
     )
     # Movie -> WatchEntry (one to many collection)
-    watch_entries: Mapped[list[WatchEntry]] = relationship(
+    watch_entries: Mapped[list["WatchEntry"]] = relationship(
         back_populates="movie",
         cascade="all, delete-orphan",
-        lazy="dynamic",
     )
 
     def __repr__(self) -> str:
         """Devuelve una representacion legible del modelo."""
-        # TODO: ajustar los campos utilizados en la representacion.
         return f"<Movie id={getattr(self, 'id', None)} title={getattr(self, 'title', None)} year={getattr(self, 'release_year', None)}>"
 
     def to_dict(self) -> dict:
         """Serializa la instancia para respuestas JSON."""
-        # TODO: reemplazar esta implementacion temporal por serializacion real.
         created = getattr(self, "created_at", datetime.now(timezone.utc))
         return {
             "id": getattr(self, "id", None),

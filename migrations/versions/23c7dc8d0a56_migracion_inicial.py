@@ -1,8 +1,8 @@
-"""Initial schema (movies, users, series, seasons, watch_entries)
+"""migracion inicial
 
-Revision ID: 4ca51e3bfc92
+Revision ID: 23c7dc8d0a56
 Revises: 
-Create Date: 2025-10-24 11:23:34.921881
+Create Date: 2025-11-01 10:08:29.350081
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4ca51e3bfc92'
+revision = '23c7dc8d0a56'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,44 +23,46 @@ def upgrade():
     sa.Column('title', sa.String(length=120), nullable=False),
     sa.Column('genre', sa.JSON(), nullable=False),
     sa.Column('release_year', sa.Integer(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('series',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('title', sa.String(length=150), nullable=False),
     sa.Column('total_seasons', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=100), nullable=False),
-    sa.Column('email', sa.String(length=120), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('name', sa.String(length=80), nullable=False),
+    sa.Column('email', sa.String(length=120), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email')
     )
     op.create_table('seasons',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('series_id', sa.Integer(), nullable=False),
     sa.Column('number', sa.Integer(), nullable=False),
     sa.Column('episodes_count', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['series_id'], ['series.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.ForeignKeyConstraint(['series_id'], ['series.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('series_id', 'number', name='uq_season_series_number')
     )
     op.create_table('watch_entries',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('content_type', sa.String(length=50), nullable=False),
     sa.Column('content_id', sa.Integer(), nullable=False),
     sa.Column('movie_id', sa.Integer(), nullable=True),
     sa.Column('series_id', sa.Integer(), nullable=True),
-    sa.Column('status', sa.String(length=50), nullable=False),
+    sa.Column('status', sa.String(length=20), nullable=False),
     sa.Column('current_season', sa.Integer(), nullable=True),
     sa.Column('current_episode', sa.Integer(), nullable=True),
     sa.Column('watched_episodes', sa.Integer(), nullable=True),
     sa.Column('total_episodes', sa.Integer(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.ForeignKeyConstraint(['movie_id'], ['movies.id'], ),
     sa.ForeignKeyConstraint(['series_id'], ['series.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),

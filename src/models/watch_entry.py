@@ -1,14 +1,17 @@
 """Modelo puente que guarda el progreso del usuario."""
 
 from __future__ import annotations
+from typing import TYPE_CHECKING
 from datetime import datetime, timezone
 from src.extensions import db
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import String, Integer, DateTime, ForeignKey
-from src.models.movie import Movie
-from src.models.serie import Serie
-from src.models.user import User
+from sqlalchemy.sql import func
 
+if TYPE_CHECKING:
+    from src.models.movie import Movie
+    from src.models.serie import Serie
+    from src.models.user import User
 
 
 class WatchEntry(db.Model):
@@ -30,28 +33,24 @@ class WatchEntry(db.Model):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
-
-    # Relacion con User
-    user: Mapped[list[User]] = relationship(
-        "User",
+    user: Mapped["User"] = relationship(
         back_populates="watch_entries",
     )
-    # Relacion con Movie
-    movie: Mapped[list[Movie]] = relationship(
-        "Movie",
+    
+    movie: Mapped["Movie"] = relationship(
         back_populates="watch_entries",
     )
-    # Relacion con Series
-    series: Mapped[list[Serie]] = relationship(
-        "Serie",
+    
+    series: Mapped["Serie"] = relationship(
         back_populates="watch_entries",
     )
 
     def percentage_watched(self) -> float:
         """Calcula el porcentaje completado para el contenido asociado."""
-        # TODO: implementar calculo utilizando watched_episodes y total_episodes.
         total = self.total_episodes or 0
         watched = self.watched_episodes or 0
         if total <= 0:
@@ -61,7 +60,6 @@ class WatchEntry(db.Model):
 
     def mark_as_watched(self) -> None:
         """Marca el contenido como completado."""
-        # TODO: actualizar atributos y timestamps para reflejar el estado final.
         if self.total_episodes and (self.watched_episodes or 0) < self.total_episodes:
             self.watched_episodes = self.total_episodes
         self.status = "completed"
@@ -69,7 +67,6 @@ class WatchEntry(db.Model):
 
     def to_dict(self) -> dict:
         """Serializa la entrada para respuestas JSON."""
-        # TODO: reemplazar con serializacion acorde al modelo final.
         updated = getattr(self, "updated_at", datetime.now(timezone.utc))
         return {
             "id": getattr(self, "id", None),
